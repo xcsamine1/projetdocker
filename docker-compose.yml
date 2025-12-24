@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: react-ui
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - frontend-net
+
+  backend:
+    build: ./backend
+    container_name: flask-api
+    environment:
+      MONGO_URI: mongodb://zh:test@mongo:27017/mongotask
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    networks:
+      - frontend-net
+      - backend-net
+
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    environment:
+      MONGO_INITDB_DATABASE: mongotask
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpass
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    networks:
+      - backend-net
+
+networks:
+  frontend-net:
+  backend-net:
+
+volumes:
+  mongo_data:
